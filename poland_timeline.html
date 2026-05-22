@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Poland: Cold War Timeline</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --red:    #c0392b;
+    --white:  #f5f0e8;
+    --dark:   #1a1a2e;
+    --mid:    #2e2e4e;
+    --gold:   #d4a843;
+    --muted:  #8888aa;
+    --line:   #3a3a5c;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: var(--dark);
+    color: var(--white);
+    font-family: 'Source Sans 3', sans-serif;
+    overflow: hidden;
+  }
+
+  /* ── SHELL ── */
+  #app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100%;
+  }
+
+  /* ── HEADER ── */
+  header {
+    flex-shrink: 0;
+    background: linear-gradient(135deg, #0d0d1f 0%, #1a1a2e 60%, #2e1a1a 100%);
+    border-bottom: 2px solid var(--red);
+    padding: 14px 28px 10px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+  .flag {
+    display: flex;
+    flex-direction: column;
+    width: 36px;
+    height: 24px;
+    border-radius: 3px;
+    overflow: hidden;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,.4);
+  }
+  .flag .w { flex: 1; background: #fff; }
+  .flag .r { flex: 1; background: var(--red); }
+  .header-text h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem;
+    font-weight: 900;
+    letter-spacing: .04em;
+    color: var(--white);
+    line-height: 1.1;
+  }
+  .header-text p {
+    font-size: .72rem;
+    color: var(--muted);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+
+  /* ── NAV DOTS (year markers on top) ── */
+  #dot-nav {
+    flex-shrink: 0;
+    background: var(--mid);
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 28px;
+    height: 44px;
+    gap: 4px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  #dot-nav::-webkit-scrollbar { display: none; }
+  .dot-btn {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: .65rem;
+    letter-spacing: .06em;
+    transition: color .2s;
+  }
+  .dot-btn:hover { color: var(--gold); }
+  .dot-btn.active { color: var(--white); }
+  .dot-pip {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--line);
+    border: 2px solid var(--muted);
+    transition: background .25s, border-color .25s, transform .25s;
+  }
+  .dot-btn.active .dot-pip {
+    background: var(--red);
+    border-color: var(--red);
+    transform: scale(1.4);
+  }
+  .dot-btn:hover .dot-pip { border-color: var(--gold); }
+
+  /* ── CARD VIEWPORT ── */
+  #viewport {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 28px 32px 24px;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(60px);
+    transition: opacity .45s cubic-bezier(.4,0,.2,1),
+                transform .45s cubic-bezier(.4,0,.2,1);
+  }
+  .card.active {
+    opacity: 1;
+    pointer-events: all;
+    transform: translateX(0);
+  }
+  .card.exit-left {
+    opacity: 0;
+    transform: translateX(-60px);
+  }
+
+  /* decorative vertical accent */
+  .card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 20px; bottom: 20px;
+    width: 4px;
+    background: linear-gradient(180deg, var(--red), transparent);
+    border-radius: 0 2px 2px 0;
+  }
+
+  .card-year {
+    font-family: 'Playfair Display', serif;
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: var(--red);
+    line-height: 1;
+    opacity: .15;
+    position: absolute;
+    top: 16px; right: 28px;
+    user-select: none;
+  }
+  .card-tag {
+    font-size: .65rem;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+  .card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: var(--white);
+    line-height: 1.25;
+    margin-bottom: 14px;
+    max-width: 82%;
+  }
+  .card-divider {
+    width: 48px; height: 2px;
+    background: var(--red);
+    margin-bottom: 14px;
+    border-radius: 1px;
+  }
+  .card-body {
+    font-size: .92rem;
+    line-height: 1.7;
+    color: #c8c8e0;
+    flex: 1;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--line) transparent;
+    padding-right: 4px;
+  }
+
+  /* ── FOOTER CONTROLS ── */
+  footer {
+    flex-shrink: 0;
+    background: var(--mid);
+    border-top: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 24px;
+    gap: 12px;
+  }
+  .ctrl-btn {
+    background: none;
+    border: 1px solid var(--line);
+    color: var(--white);
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: .8rem;
+    letter-spacing: .08em;
+    padding: 7px 20px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background .2s, border-color .2s;
+  }
+  .ctrl-btn:hover:not(:disabled) {
+    background: var(--line);
+    border-color: var(--muted);
+  }
+  .ctrl-btn:disabled { opacity: .3; cursor: default; }
+  .ctrl-btn.primary {
+    background: var(--red);
+    border-color: var(--red);
+    color: #fff;
+  }
+  .ctrl-btn.primary:hover:not(:disabled) { background: #a93226; }
+
+  .counter {
+    font-size: .75rem;
+    color: var(--muted);
+    letter-spacing: .1em;
+    white-space: nowrap;
+  }
+
+  /* ── PROGRESS BAR ── */
+  #progress {
+    position: absolute;
+    bottom: 0; left: 0;
+    height: 3px;
+    background: var(--red);
+    transition: width .45s cubic-bezier(.4,0,.2,1);
+    border-radius: 0 2px 0 0;
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header>
+    <div class="flag"><div class="w"></div><div class="r"></div></div>
+    <div class="header-text">
+      <h1>Poland &amp; the Cold War</h1>
+      <p>1945 – 1991 &nbsp;·&nbsp; Key Events</p>
+    </div>
+  </header>
+
+  <div id="dot-nav"></div>
+
+  <div id="viewport">
+    <div id="progress"></div>
+  </div>
+
+  <footer>
+    <button class="ctrl-btn" id="btn-prev">← Prev</button>
+    <span class="counter" id="counter"></span>
+    <button class="ctrl-btn primary" id="btn-next">Next →</button>
+  </footer>
+</div>
+
+<script>
+const events = [
+  {
+    year: "1945–47",
+    tag: "Post-War Occupation",
+    title: "Soviet Control",
+    body: "After WWII ended, the Soviet Union installed a communist government in Poland, sidelining democratic aspirations. Opposition parties were systematically weakened, the 1947 elections were tightly controlled, and Poland was absorbed into the Soviet sphere of influence — reshaping its government, economy, and foreign policy for decades. The occupation bred deep resentment that would later fuel resistance movements."
+  },
+  {
+    year: "1955",
+    tag: "Military Alliance",
+    title: "Poland Joins the Warsaw Pact",
+    body: "Poland formally joined the Warsaw Pact, a Soviet-led military alliance created as a counterweight to NATO. Membership tightened Poland's alignment with Soviet military objectives, eroded independent foreign policy, and kept Soviet troops stationed on Polish soil — cementing its place within the Eastern Bloc and deepening Cold War tensions across Europe."
+  },
+  {
+    year: "1956",
+    tag: "Workers' Uprising",
+    title: "Poznań Protests",
+    body: "Workers in Poznań took to the streets over poor wages, harsh living conditions, and communist misrule. The government's violent military response killed and injured many demonstrators. The uprising exposed the depth of anti-communist anger nationwide and, by year's end, led to Władysław Gomułka's return to power with promises of limited reform — inspiring future resistance for years to come."
+  },
+  {
+    year: "1968",
+    tag: "Censorship & Repression",
+    title: "Student Protests & Crackdowns",
+    body: "Students and intellectuals rose up against censorship and the absence of basic freedoms. The communist government responded with mass arrests and a brutal crackdown. Simultaneously, an officially orchestrated anti-Semitic campaign forced thousands of Polish Jews into exile. The events laid bare the regime's grip on society and deepened the chasm of distrust between citizens and the state."
+  },
+  {
+    year: "1970",
+    tag: "Labor Unrest",
+    title: "Baltic Coast Worker Protests",
+    body: "Rising food prices and deteriorating economic conditions drove workers in Baltic coast cities to strike and march. The government's violent suppression left dozens dead. The crisis forced communist leader Gomułka from office, replaced by Edward Gierek. The protests underscored how economic failure was corroding communist legitimacy and planted seeds for the labor movement that would flourish a decade later."
+  },
+  {
+    year: "1978",
+    tag: "Spiritual Inspiration",
+    title: "Election of Pope John Paul II",
+    body: "Kraków cardinal Karol Wojtyła became Pope John Paul II — the first non-Italian pope in over four centuries. His election electrified Polish society under communist rule. His 1979 visit drew millions and carried powerful messages of human dignity and freedom. The Pope's moral authority emboldened ordinary Poles to resist communism, making him one of the most consequential figures in Poland's modern history."
+  },
+  {
+    year: "1980",
+    tag: "Birth of Solidarity",
+    title: "Creation of Solidarity",
+    body: "Workers at the Gdańsk shipyard, led by electrician Lech Wałęsa, founded Solidarity — the first independent trade union in the communist Eastern Bloc. Millions flocked to the movement demanding workers' rights and political reform, placing the communist government on the back foot. Solidarity became a worldwide symbol of peaceful resistance to Soviet-backed authoritarianism and laid the groundwork for Poland's democratic transformation."
+  },
+  {
+    year: "1981",
+    tag: "State Crackdown",
+    title: "Martial Law in Poland",
+    body: "Fearing Solidarity's growing power, communist leader Wojciech Jaruzelski declared martial law. Thousands of activists were interned, civil liberties were suspended, and daily life came under strict military control. Though Solidarity was driven underground, resistance persisted. Martial law devastated Poland's economy, isolated the country internationally, and persuaded many Poles that communism was incapable of governing effectively."
+  },
+  {
+    year: "1989",
+    tag: "Democratic Breakthrough",
+    title: "Round Table Talks & Free Elections",
+    body: "Crushed by economic crisis and mounting public pressure, the communist government negotiated with Solidarity at the historic Round Table Talks. The resulting partially free elections saw Solidarity win an overwhelming mandate, ending communist rule. Poland became a pioneering example of peaceful democratic transition in the Eastern Bloc — a model that rippled across Eastern Europe and accelerated communism's collapse continent-wide."
+  },
+  {
+    year: "1991",
+    tag: "New Era",
+    title: "End of Communist Rule",
+    body: "With communist rule fully dismantled and the Soviet Union dissolved, Poland embarked on building democratic institutions and a market economy. It forged closer ties with Western Europe and the United States — a path that led to NATO membership in 1999 and EU accession in 2004. Poland's Cold War experience profoundly shapes its modern commitment to democracy, national sovereignty, and vigilance against Russian influence."
+  }
+];
+
+let current = 0;
+let exiting = null;
+
+const viewport = document.getElementById('viewport');
+const progress = document.getElementById('progress');
+const dotNav   = document.getElementById('dot-nav');
+const counter  = document.getElementById('counter');
+const btnPrev  = document.getElementById('btn-prev');
+const btnNext  = document.getElementById('btn-next');
+
+// Build cards
+const cards = events.map((ev, i) => {
+  const el = document.createElement('div');
+  el.className = 'card';
+  el.innerHTML = `
+    <div class="card-year">${ev.year}</div>
+    <div class="card-tag">${ev.tag}</div>
+    <h2 class="card-title">${ev.title}</h2>
+    <div class="card-divider"></div>
+    <p class="card-body">${ev.body}</p>
+  `;
+  viewport.appendChild(el);
+  return el;
+});
+
+// Build dot nav
+events.forEach((ev, i) => {
+  const btn = document.createElement('button');
+  btn.className = 'dot-btn';
+  btn.innerHTML = `<div class="dot-pip"></div><span>${ev.year.split('–')[0]}</span>`;
+  btn.addEventListener('click', () => goTo(i));
+  dotNav.appendChild(btn);
+});
+
+function getDots() { return dotNav.querySelectorAll('.dot-btn'); }
+
+function render(dir = 1) {
+  getDots().forEach((d, i) => d.classList.toggle('active', i === current));
+  cards.forEach((c, i) => {
+    c.classList.remove('active', 'exit-left');
+    if (i === current) {
+      // slight delay so exiting card clears
+      setTimeout(() => c.classList.add('active'), 20);
+    }
+  });
+  progress.style.width = ((current + 1) / events.length * 100) + '%';
+  counter.textContent = `${current + 1} / ${events.length}`;
+  btnPrev.disabled = current === 0;
+  btnNext.disabled = current === events.length - 1;
+  btnNext.textContent = current === events.length - 1 ? 'End' : 'Next →';
+}
+
+function goTo(idx) {
+  if (idx === current) return;
+  const dir = idx > current ? 1 : -1;
+  // apply exit class to current
+  if (dir === -1) cards[current].classList.add('exit-left');
+  else cards[current].classList.remove('active');
+  current = idx;
+  render(dir);
+}
+
+btnPrev.addEventListener('click', () => { if (current > 0) goTo(current - 1); });
+btnNext.addEventListener('click', () => { if (current < events.length - 1) goTo(current + 1); });
+
+// Keyboard nav
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' && current < events.length - 1) goTo(current + 1);
+  if (e.key === 'ArrowLeft'  && current > 0)                  goTo(current - 1);
+});
+
+// Init
+render();
+// Force first card visible immediately
+cards[0].style.transition = 'none';
+cards[0].classList.add('active');
+setTimeout(() => { cards[0].style.transition = ''; }, 50);
+</script>
+</body>
+</html>
